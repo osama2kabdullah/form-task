@@ -27,12 +27,6 @@ class Main extends Component {
           <input type="text" id="name" name="name" required />
 
           <label htmlFor="sectors">Sectors:</label>
-          {/* <select id="sectors" name="sectors">
-            <option value=""></option>
-            <option value="technology">Technology</option>
-            <option value="finance">Finance</option>
-            <option value="healthcare">Healthcare</option>
-          </select> */}
 
           <select id="sectors" name="sectors" multiple size={5}>
             {options.map((option) => (
