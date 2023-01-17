@@ -14,7 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 const uri =
-`mongodb+srv://${DB_USER_NAME}:${DB_PASS_KEY}@cluster0.qf4bw47.mongodb.net/?retryWrites=true&w=majority`; //change this uri and add your own
+`mongodb+srv://${DB_USER_NAME}:${DB_PASS_KEY}@cluster0.qf4bw47.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri);
 
 async function run() {
@@ -26,6 +26,14 @@ async function run() {
       const result =  await options.find().toArray();
       res.send({result});
     })
+    
+    /**
+     * TODO:
+     * 1. make a post api that recieve users info
+     * 2. check users name
+     * 3. if name contains in DB change his/her value
+     * 4. otherwise insert him/her
+    */
     
   } finally {
     client.close();
