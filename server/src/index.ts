@@ -20,8 +20,12 @@ const client = new MongoClient(uri);
 async function run() {
   try {
     client.connect();
-    const places = client.db("travel-guru").collection("places"); //it will be changed
+    const options = client.db("task-form").collection("involved-options");
     
+    app.get('/options', async (req, res)=>{
+      const result =  await options.find().toArray();
+      res.send({result});
+    })
     
   } finally {
     client.close();
