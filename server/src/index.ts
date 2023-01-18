@@ -13,27 +13,42 @@ const port = PORT || 8080;
 app.use(cors());
 app.use(express.json());
 
-const uri =
-`mongodb+srv://${DB_USER_NAME}:${DB_PASS_KEY}@cluster0.qf4bw47.mongodb.net/?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${DB_USER_NAME}:${DB_PASS_KEY}@cluster0.qf4bw47.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri);
 
 async function run() {
   try {
     client.connect();
     const options = client.db("task-form").collection("involved-options");
+    const userData = client.db("task-form").collection("user-data");
+
+    //get all options
+    app.get("/options", async (req, res) => {
+      const result = await options.find().toArray();
+      res.send({ result });
+    });
     
-    app.get('/options', async (req, res)=>{
-      const result =  await options.find().toArray();
+    //retribe users data
+    app.get('/usersname/:name', async (req, res)=>{
+      const {name} = req.params;
+      const result = await userData.findOne({name});
       res.send({result});
     })
-    
-    /**
-     * TODO:
-     * 1. make a post api that recieve users info
-     * 2. check users name
-     * 3. if name contains in DB change his/her value
-     * 4. otherwise insert him/her
-    */
+
+    //insert or update users data
+    app.post("/userdata", async (req, res) => {
+      const { name } = req.body;
+      const result = await userData.findOneAndUpdate(
+        { name },
+        { $set: req.body },
+        { upsert: true }
+      );
+      if (result.ok > 0) {
+        res.status(200).send({ message: result });
+      } else {
+        res.status(500).send({ message: result });
+      }
+    });
     
   } finally {
     client.close();

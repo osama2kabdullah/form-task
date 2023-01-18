@@ -1,6 +1,7 @@
 import { Component, StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import axios from 'axios';
 
 class Main extends Component {
   state = {
@@ -11,33 +12,42 @@ class Main extends Component {
   };
 
   componentDidMount() {
-    let selectedOptions = JSON.parse(localStorage.getItem("options"));//load from api
-    this.setState({ selectedOptions });
+    // get that users info by name
+    const usersName = JSON.parse(sessionStorage.getItem("name"));
+    axios.get(`http://localhost:8080/usersname/${usersName}`).then(data=>{
+      const { name, termsAgree, newSelectedOptions:selectedOptions  } = data?.data?.result;
+      this.setState({name, termsAgree, selectedOptions})
+    }).catch(err=>console.log({getUserInfoErr: err}))
     
-    /**
-     * TODO:
-     * 1. load users data from express api and remove localstorage api
-     * 2. set name | termsAgree | selectedOptions
-    */
-    
-    fetch("http://localhost:8080/options")
-      .then((res) => res.json())
-      .then((data) => {
-        this.setState({ options: data?.result });
-      });
+    // load options from own db
+    axios.get('http://localhost:8080/options').then(data=>{
+      this.setState({options: data.data.result});
+    }).catch(err=>console.log({err}))
   }
-
-  controledForm = () => {};
 
   handleSubmit = (e) => {
     e.preventDefault();
     const { name, termsAgree, selectedOptions } = this.state;
-    const newSelectedOptions = selectedOptions.map((option) => option.value);
-    console.log({newSelectedOptions, termsAgree, name});
-    /**
-     * TODO:
-     * 1. hit post api with that values
-    */
+    const newSelectedOptions = selectedOptions.map((option) => option?.value);
+    if(newSelectedOptions.length < 1){
+      return;
+    }
+    //user inputs data post in db
+    axios.post('http://localhost:8080/userdata', {newSelectedOptions, termsAgree, name})
+    .then((res)=> {
+      if(res.status === 200){
+        sessionStorage.setItem('name', JSON.stringify(name));
+        let message;
+        if(res.data.message.lastErrorObject.updatedExisting){
+          message = 'Updated'
+        }else {
+          message = 'Inserted'
+        }
+        alert(`Congrates ${name}! Your Data is ${message}`);
+      };
+    }).catch((err)=> {
+      console.log({err});
+    });
   };
 
   render() {
