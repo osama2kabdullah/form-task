@@ -14,13 +14,13 @@ class Main extends Component {
   componentDidMount() {
     // get that users info by name
     const usersName = JSON.parse(sessionStorage.getItem("name"));
-    axios.get(`http://localhost:8080/usersname/${usersName}`).then(data=>{
+    axios.get(`https://form-task-server.onrender.com/usersname/${usersName}`).then(data=>{
       const { name, termsAgree, newSelectedOptions:selectedOptions  } = data?.data?.result;
       this.setState({name, termsAgree, selectedOptions})
     }).catch(err=>console.log({getUserInfoErr: err}))
     
     // load options from own db
-    axios.get('http://localhost:8080/options').then(data=>{
+    axios.get('https://form-task-server.onrender.com/options').then(data=>{
       this.setState({options: data.data.result});
     }).catch(err=>console.log({err}))
   }
@@ -33,7 +33,7 @@ class Main extends Component {
       return;
     }
     //user inputs data post in db
-    axios.post('http://localhost:8080/userdata', {newSelectedOptions, termsAgree, name})
+    axios.post('https://form-task-server.onrender.com/userdata', {newSelectedOptions, termsAgree, name})
     .then((res)=> {
       if(res.status === 200){
         sessionStorage.setItem('name', JSON.stringify(name));
