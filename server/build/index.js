@@ -22,16 +22,35 @@ const app = (0, express_1.default)();
 const port = PORT || 8080;
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
-const uri = `mongodb+srv://${DB_USER_NAME}:${DB_PASS_KEY}@cluster.mongodb.net/test?retryWrites=true&w=majority`;
+const uri = `mongodb+srv://${DB_USER_NAME}:${DB_PASS_KEY}@cluster0.qf4bw47.mongodb.net/?retryWrites=true&w=majority`;
 const client = new mongodb_1.MongoClient(uri);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             client.connect();
-            const places = client.db("travel-guru").collection("places");
-            app.get("/allplaces", (req, res) => __awaiter(this, void 0, void 0, function* () {
-                const allPlace = yield places.find().project({ name: 1 }).toArray();
-                res.send(allPlace);
+            const options = client.db("task-form").collection("involved-options");
+            const userData = client.db("task-form").collection("user-data");
+            //get all options
+            app.get("/options", (req, res) => __awaiter(this, void 0, void 0, function* () {
+                const result = yield options.find().toArray();
+                res.send({ result });
+            }));
+            //retribe users data
+            app.get('/usersname/:name', (req, res) => __awaiter(this, void 0, void 0, function* () {
+                const { name } = req.params;
+                const result = yield userData.findOne({ name });
+                res.send({ result });
+            }));
+            //insert or update users data
+            app.post("/userdata", (req, res) => __awaiter(this, void 0, void 0, function* () {
+                const { name } = req.body;
+                const result = yield userData.findOneAndUpdate({ name }, { $set: req.body }, { upsert: true });
+                if (result.ok > 0) {
+                    res.status(200).send({ message: result });
+                }
+                else {
+                    res.status(500).send({ message: result });
+                }
             }));
         }
         finally {
